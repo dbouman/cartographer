@@ -19,3 +19,9 @@ html, body {
 .ui-mobile .ui-page {
 	height: 100%;
 }
+
+#nav-footer label {
+	position: relative;
+	top: -15px;
+	display: inline-block;
+}
