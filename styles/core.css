@@ -23,5 +23,9 @@ html, body {
 #nav-footer label {
 	position: relative;
 	top: -15px;
-	display: inline-block;
+	display: inline;
+}
+
+#search-popup, #favorites-popup {
+	width: 100%;
 }

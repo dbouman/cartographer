@@ -25,7 +25,7 @@
 				
 				self.getCurrentPosition(function(position, status) {
 					if ( status === 'OK' ) {
-						clientPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+						//clientPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 					} 
 					self.addMarker({'position': clientPosition, 'bounds': false, 'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'});
 					/*self.addShape('Circle', { 
@@ -60,9 +60,26 @@
 						busesLayer.setMap(null);
 					}
 				});  
-
 				
 			}});
+
+			$("#search_button").click(function(event) {
+				$("#search").popup("open", {
+					x: 0,
+					y: 0,
+					transition: 'slideup',
+					positionTo: 'origin'
+				});
+			});
+
+			$("#fav_button").click(function(event) {
+				$("#favorites").popup("open", {
+					x: 0,
+					y: 0,
+					transition: 'slideup',
+					positionTo: 'origin'
+				});
+			});
 
 		});			
         </script>
@@ -72,43 +89,65 @@
 		 	<div data-role="content" id="map_content" data-theme="a">
 	                <div id="map"></div>
 	        </div>
-			<div id="nav-footer" data-role="footer" class="ui-grid-a" data-position="fixed" data-fullscreen="true" data-theme="a">
-				<div class="ui-block-a" style="padding-left: 20px;">
-					<a href="#search" data-rel="popup" data-position-to="window" data-inline="true" data-role="button" data-icon="search" data-transition="pop">Search</a>
-					<a href="#favorites" data-rel="popup" data-position-to="window"  data-inline="true" data-role="button" data-icon="star" data-transition="pop">Favorites</a>
+			<div id="nav-footer" data-role="footer" data-position="fixed" data-fullscreen="true" data-theme="a">
+				<div style="float: left; margin-left: 15px;">
+					<a id="search_button" href="#" data-inline="true" data-role="button" data-iconshadow="false" data-icon="search" data-iconpos="notext" style="margin-right: 20px;">Search</a>
+					<a id="fav_button" href="#" data-inline="true" data-role="button" data-iconshadow="false" data-icon="star" data-iconpos="notext">Favorites</a>
 				</div>
-				<div class="ui-block-b" style="padding-right: 20px; text-align: right; vertical-align: middle;">
-						<label for="events">Events:</label> <select name="events" id="events" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
+				<div style="text-align: right; vertical-align: middle; float:right; margin-right: 10px;">
+						<label for="events">E</label> <select name="events" id="events" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
 							<option value="Off">Off</option>
 							<option value="On">On</option>
 						</select>&nbsp;
-						<label for="buses">Buses:</label> <select name="buses" id="buses" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
+						<label for="buses">B</label> <select name="buses" id="buses" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
 							<option value="Off">Off</option>
 							<option value="On">On</option>
 						</select>
 				</div>
 				<!-- Search Popup -->
-				<div data-role="popup" id="search" data-overlay-theme="a" data-theme="c" style="max-width:400px;" class="ui-corner-all">
+				<div data-role="popup" id="search" data-overlay-theme="a" data-theme="c" data-corners="false" class="ui-corner-all">
 					<div data-role="header" data-theme="a" class="ui-corner-top">
 						<h1>Search</h1>
 					</div>
 					<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
-						<h3 class="ui-title">Are you sure you want to delete this page?</h3>
-						<p>This action cannot be undone.</p>
-						<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>    
-						<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">Delete</a>  
+						<ul data-role="listview" data-filter="true" data-filter-reveal="true" data-filter-placeholder="Search places and events">
+							<li><a href="index.html">Acura</a></li>
+							<li><a href="index.html">Audi</a></li>
+							<li><a href="index.html">BMW</a></li>
+							<li><a href="index.html">Cadillac</a></li>
+							<li><a href="index.html">Chrysler</a></li>
+							<li><a href="index.html">Dodge</a></li>
+							<li><a href="index.html">Ferrari</a></li>
+							<li><a href="index.html">Ford</a></li>
+							<li><a href="index.html">GMC</a></li>
+							<li><a href="index.html">Honda</a></li>
+							<li><a href="index.html">Hyundai</a></li>
+							<li><a href="index.html">Infiniti</a></li>
+							<li><a href="index.html">Jeep</a></li>
+							<li><a href="index.html">Kia</a></li>
+							<li><a href="index.html">Lexus</a></li>
+							<li><a href="index.html">Mini</a></li>
+							<li><a href="index.html">Nissan</a></li>
+							<li><a href="index.html">Porsche</a></li>
+							<li><a href="index.html">Subaru</a></li>
+							<li><a href="index.html">Toyota</a></li>
+							<li><a href="index.html">Volkswagon</a></li>
+							<li><a href="index.html">Volvo</a></li>
+						</ul>
 					</div>
 				</div>
 				<!-- Favorites Popup -->
-				<div data-role="popup" id="favorites" data-overlay-theme="a" data-theme="c" style="max-width:400px;" class="ui-corner-all">
+				<div data-role="popup" id="favorites" data-overlay-theme="a" data-theme="c" data-corners="false" class="ui-corner-all">
 					<div data-role="header" data-theme="a" class="ui-corner-top">
 						<h1>Favorites</h1>
 					</div>
 					<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
-						<h3 class="ui-title">Are you sure you want to delete this page?</h3>
-						<p>This action cannot be undone.</p>
-						<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>    
-						<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">Delete</a>  
+						<ul data-role="listview" data-filter="true" data-filter-reveal="false" data-filter-placeholder="Search favorites">
+							<li><a href="index.html">Acura</a></li>
+							<li><a href="index.html">Audi</a></li>
+							<li><a href="index.html">BMW</a></li>
+							<li><a href="index.html">BMW</a></li>
+						</ul>  
 					</div>
 				</div>
 			</div>			
