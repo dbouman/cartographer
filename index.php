@@ -16,45 +16,69 @@
 		<script src="scripts/jquery.ui.map.extensions.js"></script>
 		<script src="scripts/jquery.ui.map.overlays.js"></script>
 		<script type="text/javascript">
+
+		//var eventsLayer = new google.maps.KmlLayer('http://dannybouman.com/cartographer/data/events.kml?'+(new Date()).getTime());
+		//var busesLayer = new google.maps.KmlLayer('http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml');
+		var map,currentPosition,directionsDisplay,directionsService;
+		var infowindow = new google.maps.InfoWindow();
+		var eventIcon = new google.maps.MarkerImage(
+			    "http://maps.google.com/mapfiles/kml/paddle/grn-diamond.png",
+			    null, /* size is determined at runtime */
+			    null, /* origin is 0,0 */
+			    null, /* anchor is bottom center of the scaled image */
+			    new google.maps.Size(32, 32)
+			);
+		var bounds = new google.maps.LatLngBounds ();
+		var activeEvents = [];
+		var events = []
+		events['Adele H. Stamp Student Union Building'] = new Array('-76.94491733141443','38.98783329697648','Upcoming events:<br />6:00pm - Free tacos @ Taco Bell<br />7:00pm - Movie (Iron Man 3)');
+		events['Geology Building'] = new Array('-76.942308','38.990855','test <a href="" class="test">test</a>');
+		
 		$(document).ready(function() {
 			$('#map').gmap({'center': '38.9869367,-76.94286790000001', 'zoom': 18, 'disableDefaultUI':true, 'callback': function() {
 				var self = this;
-				var clientPosition = new google.maps.LatLng('38.9869367', '-76.94286790000001')
-				var eventsLayer = new google.maps.KmlLayer('http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml');
-				var busesLayer = new google.maps.KmlLayer('http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml');
-				
+				map = self.get('map');
+				currentPosition = new google.maps.LatLng('38.9869367', '-76.94286790000001');
+				directionsDisplay = new google.maps.DirectionsRenderer(); 
+	            directionsService = new google.maps.DirectionsService();
+	            directionsDisplay.setMap(map);
+			
 				self.getCurrentPosition(function(position, status) {
 					if ( status === 'OK' ) {
-						//clientPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+						//currentPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 					} 
-					self.addMarker({'position': clientPosition, 'bounds': false, 'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'});
+					self.addMarker({'position': currentPosition, 'bounds': false, 'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'});
 					/*self.addShape('Circle', { 
 						'strokeWeight': 0, 
 						'fillColor': "#008595", 
 						'fillOpacity': 0.25, 
-						'center': clientPosition, 
+						'center': currentPosition, 
 						'radius': 15, 
 						'clickable': false 
 					});*/
-					self.get('map').panTo(clientPosition);
+					map.panTo(currentPosition);
+					bounds.extend(currentPosition);
 				}); 
 
 				// Events toggle
 				$("#events").change(function() {
 					var currValue = $("select#events option:selected").text();
 					if (currValue == "On") {
-						eventsLayer.setMap(self.get('map'));
+						//eventsLayer.setMap(self.get('map'));
+						addAllMarkers ( events, activeEvents, eventIcon);
 					}
 					else {
-						eventsLayer.setMap(null);
+						//eventsLayer.setMap(null);
+						removeAllMarkers (activeEvents);
 					}
+					
 				});  
 
 				// Bus overlay toggle
 				$("#buses").change(function() {
 					var currValue = $("select#buses option:selected").text();
 					if (currValue == "On") {
-						busesLayer.setMap(self.get('map'));
+						busesLayer.setMap(map);
 					}
 					else {
 						busesLayer.setMap(null);
@@ -81,7 +105,78 @@
 				});
 			});
 
-		});			
+		});	
+
+		function addAllMarkers ( markers, active, icon) {
+			var newBounds = bounds;
+			for (var key in markers) {
+			    var data = markers[key];
+			    var latLng = new google.maps.LatLng (data[1], data[0])
+			    var navBtn = '<div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
+			    var marker = new google.maps.Marker({
+			        position: latLng,
+			        map: map,
+			        animation: google.maps.Animation.DROP,
+			        icon: icon,
+			        title: key,
+			        clickable: true,
+			        html: '<h3>' + key + '</h3>' + data[2] + '<br /><br />' + navBtn
+			    });
+
+			    active.push(marker);
+			    
+		    	google.maps.event.addListener(marker, 'click', function() {
+			    	infowindow.close();
+			    	//console.log($(this).html());
+		    		infowindow.setContent(this.html);
+		    		infowindow.open(map, this);
+		    	});
+		    	
+		    	bounds.extend (latLng);
+			}
+			map.fitBounds (newBounds);
+		}
+
+		function navigate(lat, lng) {
+			var targetDestination = new google.maps.LatLng (lat, lng);
+			if (currentPosition && currentPosition != '' && targetDestination && targetDestination != '') {
+                var request = {
+                    origin:currentPosition, 
+                    destination:targetDestination,
+                    travelMode: google.maps.DirectionsTravelMode["WALKING"]
+                };
+
+                directionsService.route(request, function(response, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        //directionsDisplay.setPanel(document.getElementById("directions"));
+                        directionsDisplay.setDirections(response); 
+
+                        /*
+                            var myRoute = response.routes[0].legs[0];
+                            for (var i = 0; i < myRoute.steps.length; i++) {
+                                alert(myRoute.steps[i].instructions);
+                            }
+                        */
+                        //$("#results").show();
+                    }
+                    else {
+                        //$("#results").hide();
+                    }
+                });
+            }
+            else {
+                //$("#results").hide();
+            }
+			infowindow.close();
+		}
+
+		function removeAllMarkers (active) {
+			for (var i = 0; i < active.length; i++) {
+				active[i].setMap(null);
+			}	
+			active = [];		
+		}
+					
         </script>
     </head>
     <body>

@@ -14,6 +14,7 @@ html, body {
 	height: 100%;
 	padding: 0;
 	text-shadow: none;
+	line-height:normal;
 }
 
 .ui-mobile .ui-page {
@@ -28,4 +29,9 @@ html, body {
 
 #search-popup, #favorites-popup {
 	width: 100%;
+}
+
+.gm-style-iw {
+	color: #333333;
+	height: 200px;
 }
