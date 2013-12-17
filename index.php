@@ -23,6 +23,13 @@
 		var map,currentPosition,directionsDisplay,directionsService;
 		var infowindow = new google.maps.InfoWindow();
 		var busLine = new google.maps.Polyline();
+		var placesIcon = new google.maps.MarkerImage(
+			    "http://maps.google.com/mapfiles/kml/paddle/red-stars.png",
+			    null, /* size is determined at runtime */
+			    null, /* origin is 0,0 */
+			    null, /* anchor is bottom center of the scaled image */
+			    new google.maps.Size(32, 32)
+			);
 		var eventIcon = new google.maps.MarkerImage(
 		    "http://maps.google.com/mapfiles/kml/paddle/grn-diamond.png",
 		    null, /* size is determined at runtime */
@@ -40,6 +47,10 @@
 		var bounds = new google.maps.LatLngBounds ();
 		
 		$(document).ready(function() {
+			// Fix bottom toolbar
+			$('#nav-footer').fixedtoolbar({fullscreen: true, tapToggle: false});
+
+			// Initialize google maps
 			$('#map').gmap({'center': '38.9869367,-76.94286790000001', 'zoom': 18, 'disableDefaultUI':true, 'callback': function() {
 				var self = this;
 				map = self.get('map');
@@ -137,7 +148,7 @@
 			    var latLng = new google.maps.LatLng (data[1], data[0])
 			    var desc = '<div class="'+ cssClass +'"><h3>' + key + '</h3>' + data[2];
 			    if (allowNav)
-			    	desc =  desc + '<div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
+			    	desc =  desc + '<br /><br /><div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
 			    desc = desc + '</div>';
 			    var marker = new google.maps.Marker({
 			        position: latLng,
@@ -153,14 +164,49 @@
 			    
 		    	google.maps.event.addListener(marker, 'click', function() {
 			    	infowindow.close();
-			    	//console.log($(this).html());
 		    		infowindow.setContent(this.html);
 		    		infowindow.open(map, this);
 		    	});
 		    	
-		    	bounds.extend (latLng);
+		    	newBounds.extend (latLng);
 			}
 			map.fitBounds (newBounds);
+		}
+
+		function addMarker (key, popupid) {
+			if (activePlaces.length > 0) {
+				removeAllMarkers(activePlaces);
+			}
+	
+		    var data = places[key];
+		    var latLng = new google.maps.LatLng (data[1], data[0])
+		    var desc = '<div class="placesinfo"><h3>' + key + '</h3>' + data[2];
+		    desc =  desc + '<br /><br /><div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
+		    desc = desc + '</div>';
+		    var marker = new google.maps.Marker({
+		        position: latLng,
+		        map: map,
+		        animation: google.maps.Animation.DROP,
+		        icon: placesIcon,
+		        title: key,
+		        clickable: true,
+		        html: desc
+		    });
+
+		    infowindow.close();
+    		infowindow.setContent(desc);
+	    	infowindow.open(map, marker);
+
+	    	activePlaces.push(marker);
+		    
+	    	google.maps.event.addListener(marker, 'click', function() {
+		    	infowindow.close();
+	    		infowindow.setContent(this.html);
+	    		infowindow.open(map, this);
+	    	});
+	    	
+			$('#'+popupid).popup('close');
+			map.panTo(latLng);
 		}
 
 		function navigate(lat, lng) {
@@ -210,7 +256,7 @@
 		 	<div data-role="content" id="map_content" data-theme="a">
 	                <div id="map"></div>
 	        </div>
-			<div id="nav-footer" data-role="footer" data-position="fixed" data-fullscreen="true" data-theme="a">
+			<div id="nav-footer" data-role="footer" data-theme="a">
 				<div style="float: left; margin-left: 15px;">
 					<a id="search_button" href="#" data-inline="true" data-role="button" data-iconshadow="false" data-icon="search" data-iconpos="notext" style="margin-right: 20px;">Search</a>
 					<a id="fav_button" href="#" data-inline="true" data-role="button" data-iconshadow="false" data-icon="star" data-iconpos="notext">Favorites</a>
@@ -232,28 +278,8 @@
 					</div>
 					<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
 						<ul data-role="listview" data-filter="true" data-filter-reveal="true" data-filter-placeholder="Search places and events">
-							<li><a href="index.html">Acura</a></li>
-							<li><a href="index.html">Audi</a></li>
-							<li><a href="index.html">BMW</a></li>
-							<li><a href="index.html">Cadillac</a></li>
-							<li><a href="index.html">Chrysler</a></li>
-							<li><a href="index.html">Dodge</a></li>
-							<li><a href="index.html">Ferrari</a></li>
-							<li><a href="index.html">Ford</a></li>
-							<li><a href="index.html">GMC</a></li>
-							<li><a href="index.html">Honda</a></li>
-							<li><a href="index.html">Hyundai</a></li>
-							<li><a href="index.html">Infiniti</a></li>
-							<li><a href="index.html">Jeep</a></li>
-							<li><a href="index.html">Kia</a></li>
-							<li><a href="index.html">Lexus</a></li>
-							<li><a href="index.html">Mini</a></li>
-							<li><a href="index.html">Nissan</a></li>
-							<li><a href="index.html">Porsche</a></li>
-							<li><a href="index.html">Subaru</a></li>
-							<li><a href="index.html">Toyota</a></li>
-							<li><a href="index.html">Volkswagon</a></li>
-							<li><a href="index.html">Volvo</a></li>
+							<li><a href="#" onclick="addMarker('Computer Science Instructional Center (CSIC)','search');">Computer Science Instructional Center (CSIC)</a></li>
+							<li><a href="#" onclick="addMarker('Symons Hall','search');">Symons Hall</a></li>
 						</ul>
 					</div>
 				</div>
@@ -264,10 +290,9 @@
 					</div>
 					<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
 						<ul data-role="listview" data-filter="true" data-filter-reveal="false" data-filter-placeholder="Search favorites">
-							<li><a href="index.html">Acura</a></li>
-							<li><a href="index.html">Audi</a></li>
-							<li><a href="index.html">BMW</a></li>
-							<li><a href="index.html">BMW</a></li>
+							<li><a href="#" onclick="addMarker('Mckeldin','favorites');">Mckeldin</a></li>
+							<li><a href="#" onclick="addMarker('My parking lot','favorites');">My parking lot</a></li>
+							<li><a href="#" onclick="addMarker('Taco Bell in Stamp','favorites');">Taco Bell in Stamp</a></li>
 						</ul>  
 					</div>
 				</div>
