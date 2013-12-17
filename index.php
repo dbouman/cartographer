@@ -15,24 +15,29 @@
 		<script src="scripts/jquery.ui.map.services.js"></script>		
 		<script src="scripts/jquery.ui.map.extensions.js"></script>
 		<script src="scripts/jquery.ui.map.overlays.js"></script>
+		<script src="scripts/markers.js"></script>
 		<script type="text/javascript">
 
 		//var eventsLayer = new google.maps.KmlLayer('http://dannybouman.com/cartographer/data/events.kml?'+(new Date()).getTime());
 		//var busesLayer = new google.maps.KmlLayer('http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml');
 		var map,currentPosition,directionsDisplay,directionsService;
 		var infowindow = new google.maps.InfoWindow();
+		var busLine = new google.maps.Polyline();
 		var eventIcon = new google.maps.MarkerImage(
-			    "http://maps.google.com/mapfiles/kml/paddle/grn-diamond.png",
-			    null, /* size is determined at runtime */
-			    null, /* origin is 0,0 */
-			    null, /* anchor is bottom center of the scaled image */
-			    new google.maps.Size(32, 32)
-			);
+		    "http://maps.google.com/mapfiles/kml/paddle/grn-diamond.png",
+		    null, /* size is determined at runtime */
+		    null, /* origin is 0,0 */
+		    null, /* anchor is bottom center of the scaled image */
+		    new google.maps.Size(32, 32)
+		);
+		var busIcon = new google.maps.MarkerImage(
+		    "http://maps.google.com/mapfiles/kml/shapes/bus.png",
+		    null, /* size is determined at runtime */
+		    null, /* origin is 0,0 */
+		    null, /* anchor is bottom center of the scaled image */
+		    new google.maps.Size(32, 32)
+		);
 		var bounds = new google.maps.LatLngBounds ();
-		var activeEvents = [];
-		var events = []
-		events['Adele H. Stamp Student Union Building'] = new Array('-76.94491733141443','38.98783329697648','Upcoming events:<br />6:00pm - Free tacos @ Taco Bell<br />7:00pm - Movie (Iron Man 3)');
-		events['Geology Building'] = new Array('-76.942308','38.990855','test <a href="" class="test">test</a>');
 		
 		$(document).ready(function() {
 			$('#map').gmap({'center': '38.9869367,-76.94286790000001', 'zoom': 18, 'disableDefaultUI':true, 'callback': function() {
@@ -65,7 +70,7 @@
 					var currValue = $("select#events option:selected").text();
 					if (currValue == "On") {
 						//eventsLayer.setMap(self.get('map'));
-						addAllMarkers ( events, activeEvents, eventIcon);
+						addAllMarkers ( events, activeEvents, eventIcon, true, 'eventinfo');
 					}
 					else {
 						//eventsLayer.setMap(null);
@@ -78,10 +83,28 @@
 				$("#buses").change(function() {
 					var currValue = $("select#buses option:selected").text();
 					if (currValue == "On") {
-						busesLayer.setMap(map);
+						//busesLayer.setMap(map);
+						busLine = new google.maps.Polyline({
+			                map: map,
+			                strokeColor: "#FF0000"
+			            });
+						var service = new google.maps.DirectionsService(),snap_path=[];               
+						busLine.setMap(map);
+					   
+					  	var ori = new google.maps.LatLng(38.978195, -76.926346); 
+					   	var dest = new google.maps.LatLng(38.985086, -76.946639); 
+			           	service.route({origin: ori,destination: dest,travelMode: google.maps.DirectionsTravelMode.DRIVING},function(result, status) {                
+			            	if(status == google.maps.DirectionsStatus.OK) {                 
+			                      snap_path = snap_path.concat(result.routes[0].overview_path);
+			                      busLine.setPath(snap_path);
+			                }        
+			            });
+			           	addAllMarkers ( buses, activeBuses, busIcon, false, 'businfo');
 					}
 					else {
-						busesLayer.setMap(null);
+						//busesLayer.setMap(null);
+						busLine.setMap(null);
+						removeAllMarkers (activeBuses);
 					}
 				});  
 				
@@ -107,12 +130,15 @@
 
 		});	
 
-		function addAllMarkers ( markers, active, icon) {
+		function addAllMarkers ( markers, active, icon, allowNav, cssClass) {
 			var newBounds = bounds;
 			for (var key in markers) {
 			    var data = markers[key];
 			    var latLng = new google.maps.LatLng (data[1], data[0])
-			    var navBtn = '<div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
+			    var desc = '<div class="'+ cssClass +'"><h3>' + key + '</h3>' + data[2];
+			    if (allowNav)
+			    	desc =  desc + '<div align="center"><a id="navbtn" onclick="navigate('+data[1]+','+ data[0] +');" style="width: 150px;" class="ui-btn ui-btn-up-b ui-shadow ui-btn-corner-all ui-btn-icon-left" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true" href="#" data-role="button" data-theme="b" data-icon="arrow-r"><span class="ui-btn-inner"><span class="ui-btn-text">Navigate</span><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span></span></a></div>';
+			    desc = desc + '</div>';
 			    var marker = new google.maps.Marker({
 			        position: latLng,
 			        map: map,
@@ -120,7 +146,7 @@
 			        icon: icon,
 			        title: key,
 			        clickable: true,
-			        html: '<h3>' + key + '</h3>' + data[2] + '<br /><br />' + navBtn
+			        html: desc
 			    });
 
 			    active.push(marker);

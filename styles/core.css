@@ -31,7 +31,16 @@ html, body {
 	width: 100%;
 }
 
-.gm-style-iw {
+.gm-style-iw  {
 	color: #333333;
+}
+
+.gm-style-iw .businfo {
+	width: 125px;
+	height: 100px;
+}
+
+.gm-style-iw .eventinfo {
+	width: 210px;
 	height: 200px;
 }
