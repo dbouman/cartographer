@@ -61,7 +61,7 @@
 			
 				self.getCurrentPosition(function(position, status) {
 					if ( status === 'OK' ) {
-						//currentPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+						currentPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 					} 
 					self.addMarker({'position': currentPosition, 'bounds': false, 'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'});
 					/*self.addShape('Circle', { 
