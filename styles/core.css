@@ -23,7 +23,7 @@ html, body {
 
 #nav-footer label {
 	position: relative;
-	top: -15px;
+	top: 0;
 	display: inline;
 }
 
@@ -49,4 +49,9 @@ html, body {
 .gm-style-iw .placesinfo {
 	width: 220px;
 	height: 175px;
+}
+
+.gm-style-iw .currloc {
+	width: 80;
+	height: 20px;
 }

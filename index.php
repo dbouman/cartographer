@@ -63,7 +63,16 @@
 					if ( status === 'OK' ) {
 						currentPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 					} 
-					self.addMarker({'position': currentPosition, 'bounds': false, 'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'});
+					var marker = self.addMarker({
+						'position': currentPosition, 
+						'bounds': false, 
+						'icon' : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+					}).click(function() {
+						//self.openInfoWindow({ 'content' : 'You are here!' }, this);
+						infowindow.close();
+			    		infowindow.setContent('<div class="currloc">You are here!</div>');
+			    		infowindow.open(map, this);
+					});
 					/*self.addShape('Circle', { 
 						'strokeWeight': 0, 
 						'fillColor': "#008595", 
@@ -262,11 +271,11 @@
 					<a id="fav_button" href="#" data-inline="true" data-role="button" data-iconshadow="false" data-icon="star" data-iconpos="notext">Favorites</a>
 				</div>
 				<div style="text-align: right; vertical-align: middle; float:right; margin-right: 10px;">
-						<label for="events">E</label> <select name="events" id="events" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
+						<label for="events"><img src="images/event-icon.png" /></label> <select name="events" id="events" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
 							<option value="Off">Off</option>
 							<option value="On">On</option>
 						</select>&nbsp;
-						<label for="buses">B</label> <select name="buses" id="buses" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
+						<label for="buses"><img src="images/bus-icon.png" /></label> <select name="buses" id="buses" data-role="slider" data-inline="true" data-icon="search" data-mini="true">
 							<option value="Off">Off</option>
 							<option value="On">On</option>
 						</select>
